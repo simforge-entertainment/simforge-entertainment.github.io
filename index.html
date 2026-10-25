@@ -21,8 +21,17 @@
 
   <section id="games">
     <h2>Games</h2>
+
     <article class="game" id="bando">
-      <img class="cover" src="img/bando-cover.jpg" alt="Bando FPV drone simulator" loading="lazy">
+      <div class="slider" tabindex="0" aria-roledescription="carousel" aria-label="Bando screenshots">
+        <div class="track">
+          <figure class="slide"><img src="img/bando-cover.jpg" alt="Bando FPV drone simulator"></figure>
+          <figure class="slide"><img src="img/bando-1.jpg" alt="Bando screenshot 1"></figure>
+          <figure class="slide"><img src="img/bando-2.jpg" alt="Bando screenshot 2"></figure>
+          <figure class="slide"><img src="img/bando-3.jpg" alt="Bando screenshot 3"></figure>
+          <figure class="slide"><img src="img/bando-4.jpg" alt="Bando screenshot 4"></figure>
+        </div>
+      </div>
       <div class="body">
         <span class="tag">Early access</span>
         <h3>Bando</h3>
@@ -37,16 +46,23 @@
         </ul>
         <a class="btn" href="https://bandostudio.itch.io/bando-fpv">Get it on itch.io</a>
       </div>
-      <div class="shots">
-        <img src="img/bando-1.jpg" alt="Bando screenshot 1" loading="lazy">
-        <img src="img/bando-2.jpg" alt="Bando screenshot 2" loading="lazy">
-        <img src="img/bando-3.jpg" alt="Bando screenshot 3" loading="lazy">
-        <img src="img/bando-4.jpg" alt="Bando screenshot 4" loading="lazy">
-      </div>
     </article>
 
     <article class="game" id="pitchrc">
-      <img class="cover" src="img/pitch-cover.jpg" alt="pitchRC RC flight simulator" loading="lazy">
+      <div class="slider" tabindex="0" aria-roledescription="carousel" aria-label="pitchRC video and screenshots">
+        <div class="track">
+          <figure class="slide video" data-yt="jcSXB-owoQI">
+            <img src="img/pitch-video.jpg" alt="pitchRC gameplay video">
+            <button class="play" type="button" aria-label="Play video"><span></span></button>
+          </figure>
+          <figure class="slide"><img src="img/pitch-sa31.jpg" alt="Aerobatic plane over rolling farmland"></figure>
+          <figure class="slide"><img src="img/pitch-vf83.jpg" alt="Vintage fighter banking over the countryside"></figure>
+          <figure class="slide"><img src="img/pitch-lh61.jpg" alt="Helicopter hovering above a field"></figure>
+          <figure class="slide"><img src="img/pitch-tr24.jpg" alt="Trainer TR-24 flying past the runway"></figure>
+          <figure class="slide"><img src="img/pitch-4.jpg" alt="Flying through a hoop on the club field"></figure>
+          <figure class="slide"><img src="img/pitch-1.jpg" alt="Choosing a flying site"></figure>
+        </div>
+      </div>
       <div class="body">
         <span class="tag">Available now</span>
         <h3>pitchRC</h3>
@@ -59,12 +75,6 @@
           <li>Keyboard or gamepad controls</li>
         </ul>
         <a class="btn" href="https://bandostudio.itch.io/pitch-rc">Get it on itch.io</a>
-      </div>
-      <div class="shots">
-        <img src="img/pitch-1.jpg" alt="pitchRC screenshot 1" loading="lazy">
-        <img src="img/pitch-2.jpg" alt="pitchRC screenshot 2" loading="lazy">
-        <img src="img/pitch-3.jpg" alt="pitchRC screenshot 3" loading="lazy">
-        <img src="img/pitch-4.jpg" alt="pitchRC screenshot 4" loading="lazy">
       </div>
     </article>
 
@@ -84,5 +94,69 @@
   © 2026 Simforge Entertainment · <a href="privacy.html">Privacy Policy</a>
   <br>Google Play and the Google Play logo are trademarks of Google LLC.
 </div></footer>
+
+<script>
+document.querySelectorAll('.slider').forEach(function (s) {
+  var track = s.querySelector('.track');
+  var slides = s.querySelectorAll('.slide');
+  var i = 0, startX = null;
+
+  var prev = btn('nav prev', 'Previous', '‹');
+  var next = btn('nav next', 'Next', '›');
+  var dots = document.createElement('div');
+  dots.className = 'dots';
+  slides.forEach(function (_, n) {
+    var d = btn('dot', 'Go to slide ' + (n + 1), '');
+    d.onclick = function () { go(n); };
+    dots.appendChild(d);
+  });
+  s.append(prev, next, dots);
+  prev.onclick = function () { go(i - 1); };
+  next.onclick = function () { go(i + 1); };
+
+  function btn(cls, label, text) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = cls; b.textContent = text;
+    b.setAttribute('aria-label', label);
+    return b;
+  }
+  function stopVideo() {
+    s.querySelectorAll('.slide.video.on').forEach(function (v) {
+      v.classList.remove('on');
+      var f = v.querySelector('iframe'); if (f) f.remove();
+    });
+  }
+  function go(n) {
+    i = (n + slides.length) % slides.length;
+    stopVideo();
+    track.style.transform = 'translateX(' + (-100 * i) + '%)';
+    dots.childNodes.forEach(function (d, k) { d.classList.toggle('active', k === i); });
+  }
+  go(0);
+
+  s.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') go(i - 1);
+    if (e.key === 'ArrowRight') go(i + 1);
+  });
+  s.addEventListener('pointerdown', function (e) { startX = e.clientX; });
+  s.addEventListener('pointerup', function (e) {
+    if (startX === null) return;
+    var dx = e.clientX - startX; startX = null;
+    if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1));
+  });
+
+  s.querySelectorAll('.slide.video').forEach(function (v) {
+    v.querySelector('.play').onclick = function () {
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + v.dataset.yt + '?autoplay=1&rel=0';
+      f.title = 'pitchRC gameplay video';
+      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      f.allowFullscreen = true;
+      v.appendChild(f);
+      v.classList.add('on');
+    };
+  });
+});
+</script>
 </body>
 </html>
